@@ -22,8 +22,9 @@ def TranspositionCipher(text,key):
     row=m.ceil(len(text)/len(key))
     cipherChunks=[]
 
-    print(order)
-    for i in range(row):
+
+
+    for i in range(column):
         temp=""
         pointer=i
         while (pointer<len(text)):
@@ -33,10 +34,42 @@ def TranspositionCipher(text,key):
         cipherChunks.append(temp)
 
     cipherMessage=""
+    print(order)
     for i in order:
         cipherMessage+=cipherChunks[i]
 
     return cipherMessage
 
+def TranspositionDecipher(text,key): #perhaps more efficient
+    order=Order(key)
+    column=len(key)
+    row=m.floor(len(text)/column)
+    longCol=len(text)%column
 
-print(TranspositionCipher("what is your name","abcd"))
+
+
+    messageChunks=['']*column
+    index=0
+    for i in range(column):
+        messageChunks[order[i]]=(text[index:index+row+int(order[i]<longCol)])
+        index+=(row+int(order[i]<longCol))
+
+    for i in messageChunks:
+        print(i)
+
+    finalMessage=""
+    for j in range(row+1):
+        for i in range(column):
+            if j<row or i<longCol:
+
+                finalMessage += messageChunks[i][j]
+                print (finalMessage)
+    return finalMessage
+
+
+
+A=TranspositionCipher("hello how are you, my name is frank, nice to meet you","SHA67")
+print(len(A))
+print(A)
+B=TranspositionDecipher(A,'SHA67')
+print(B)
