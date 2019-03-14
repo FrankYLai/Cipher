@@ -71,9 +71,30 @@ def TranspositionDecipher(text,key):
 
     return finalMessage
 
+def ceasarCipher(text, key):
 
+    newtext=""
+    index=0
 
+    for i in range(len(text)):
+        newtext += chr(ord(text[i])+ord(key[index]))
+        index+=1
+        if index == len(key):
+            index=0
 
+    return newtext
+
+def ceasarDecipher(text, key):
+    newtext=""
+    index=0
+
+    for i in range(len(text)):
+        newtext += chr(ord(text[i]) - ord(key[index]))
+        index += 1
+        if index == len(key):
+            index = 0
+
+    return newtext
 
 times=0
 check=True
@@ -92,6 +113,9 @@ while (check):
     A=TranspositionCipher(text,key)
     B=TranspositionDecipher(A,key)
 
+    C=ceasarCipher(text,key)
+    D=ceasarDecipher(C,key)
+
     times+=1
     print (times)
 
@@ -101,18 +125,3 @@ while (check):
         print("key: ",key)
         print("times: ", times)
 
-
-# while True:
-#     keySize=random.randint(5,16)
-#     key=""
-#     for x in range(keySize):
-#         key+= chr(random.randint(1,256))
-#
-#     print(Order(key))
-#     if(max(Order(key))!=len(Order(key))-1):
-#         print("fail")
-#         break
-
-
-# A=TranspositionCipher("1234567890","21")
-    # B=TranspositionDecipher(A,"21")
