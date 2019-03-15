@@ -1,6 +1,7 @@
 import math as m
 import random
 import hashlib
+import chardet
 
 def Order(key):
     list=[]
@@ -132,12 +133,23 @@ def ceasarDecipher(text, key):
 #         print("key: ",key)
 #         print("times: ", times)
 
-hashed=hashlib.sha256(input("put password in here: ").encode()).hexdigest()
-for i in range (5):
-    hashed=hashlib.sha256(hashed.encode()).hexdigest()
-    print(hashed[1])
-    print(len(hashed))
+# hashed=hashlib.sha256(input("put password in here: ").encode()).hexdigest()
+# for i in range (5):
+#     hashed=hashlib.sha256(hashed.encode()).hexdigest()
+#     print(hashed[1])
+#     print(len(hashed))
 
-# infile=open("test.txt",'r')
-# print(infile.read(9000))
+# rawdata = open('1984.txt', 'rb').read(2000)
+# result = chardet.detect(rawdata)
+# print (result)
+# print (result['encoding'])
+
+detector = chardet.UniversalDetector()
+detector.reset()
+with open("1984.txt", mode='rb') as f:
+    for b in f:
+        detector.feed(b)
+        if detector.done: break
+detector.close()
+print( detector.result)
 

@@ -2,6 +2,7 @@ from enum import Enum
 import math as m
 import hashlib
 import random
+import chardet
 
 class status(Enum):
     IDLE = 1
@@ -10,12 +11,12 @@ class status(Enum):
 
 class CipherMachine:
 
-    mode=status.IDLE
-    password=""
-    hashed=""
-
-    def __init__(self):#initializer
+    def __init__(self):  #initializer
         self.mode = status.IDLE
+        self.password = ""
+        self.hashed = ""
+        self.fileDir = ""
+        self.encoding = ""
 
     def __del__(self):
         self.infile.close()
@@ -23,10 +24,21 @@ class CipherMachine:
     def changeMode(self, status):
         self.mode=status
 
+    def detector(self):
+        detector = chardet.UniversalDetector()
+        detector.reset()
+        with open(self.fileDir, mode='rb') as f:
+            for b in f:
+                detector.feed(b)
+                if detector.done: break
+        detector.close()
+        return detector.result['encoding']
+
     def Open(self,fileDir):
-        self.fileDir=fileDir
+        self.fileDir = fileDir
+        self.encoding = self.detector()
         try:
-            self.infile=open(self.fileDir, "r")
+            self.infile=open(self.fileDir, "r",encoding=self.encoding)
             if fileDir.endswith(".crypt"):
                 self.mode=status.DECIPHER
                 print("run1")
@@ -37,18 +49,17 @@ class CipherMachine:
         except FileNotFoundError:
             return False
 
-    def password(self, key):
-        self.password=key
-        self.hashed=hashlib.sha256(self.password.encode()).hexdigest()
+    def save_password(self, key):
+        self.password = key
+        self.hashed = hashlib.sha256(self.password.encode()).hexdigest()
 
-        if self.mode==status.DECIPHER:
-            if self.infile.read(len(self.hashed))!=self.hashed:
+        if self.mode == status.DECIPHER:
+            if self.infile.read(len(self.hashed)) != self.hashed:
                 self.infile.close()
-                self.infile.open(self.fileDir,'r')
+                self.infile.open(self.fileDir, 'r', encoding=self.encoding)
                 return False
 
         return True
-
 
 
     def Order(self,key):
@@ -142,8 +153,6 @@ class CipherMachine:
 
         return newtext
 
-    def isEOF(self,block,size):
-        pass
 
     def Encrypt(self):
         name="encryption/"
@@ -151,32 +160,34 @@ class CipherMachine:
             name+=chr(random.randint(ord('a'),ord('z')))
         name+=".crypt"
 
-        with open(name,"w") as outfile:
-            outfile.write(self.hashed)#make sure to delete once second stage is implemented
+        with open(name,"w",encoding=self.encoding) as outfile:
+            outfile.write(self.hashed)  #make sure to delete once second stage is implemented
             outfile.write(self.fileDir+'|')
             index=0
             block=self.infile.read(ord(self.hashed[index]))
             while len(block)==ord(self.hashed[index]):
-                outfile.write(self.TranspositionCipher(block,self.password))
-                index+=1
-                if index==len(self.hashed):
-                    index-=len(self.hashed)
+                outfile.write(self.ceasarCipher(self.TranspositionCipher(block,self.password),self.password))  #completes transposition before ceasar
+
+                index += 1
+                if index == len(self.hashed):
+                    index -= len(self.hashed)
                 block = self.infile.read(ord(self.hashed[index]))
 
 
 
     def Decrypt(self):
         name=""
-        readNext=self.infile.read(1)
-        while readNext!="|":
-            name+=readNext
-            readNext=self.infile.read(1)
+        readNext = self.infile.read(1)
+        while readNext != "|":
+            name += readNext
+            readNext = self.infile.read(1)
 
-        with open(name,'w') as outfile:
+        with open(name, 'w', encoding=self.encoding) as outfile:
             index=0
             block = self.infile.read(ord(self.hashed[index]))
             while len(block) == ord(self.hashed[index]):
-                outfile.write(self.TranspositionDecipher(block, self.password))
+                outfile.write(self.TranspositionDecipher(self.ceasarDecipher(block, self.password),self.password))#completes ceasar before transposition
+
                 index += 1
                 if index == len(self.hashed):
                     index -= len(self.hashed)
