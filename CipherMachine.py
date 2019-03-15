@@ -1,5 +1,6 @@
 from enum import Enum
 import math as m
+import hashlib
 import random
 
 class status(Enum):
@@ -9,26 +10,48 @@ class status(Enum):
 
 class CipherMachine:
 
-    def __init__(self,InputKey,status):
-        self.key = InputKey
-        self.mode = status
+    mode=status.IDLE
+    password=""
+    hashed=""
+
+    def __init__(self):#initializer
+        self.mode = status.IDLE
 
     def __del__(self):
         self.infile.close()
-
 
     def changeMode(self, status):
         self.mode=status
 
     def Open(self,fileDir):
         self.fileDir=fileDir
-        self.infile=open(fileDir, "r")
-        if fileDir.endswith(".crypt"):
-            self.mode=status.DECIPHER
-        else
-            self.mode=status.CIPHER
+        try:
+            self.infile=open(self.fileDir, "r")
+            if fileDir.endswith(".crypt"):
+                self.mode=status.DECIPHER
+                print("run1")
+            else:
+                self.mode=status.CIPHER
+                print('run2')
+            return True
+        except FileNotFoundError:
+            return False
 
-    def Order(key):
+    def password(self, key):
+        self.password=key
+        self.hashed=hashlib.sha256(self.password.encode()).hexdigest()
+
+        if self.mode==status.DECIPHER:
+            if self.infile.read(len(self.hashed))!=self.hashed:
+                self.infile.close()
+                self.infile.open(self.fileDir,'r')
+                return False
+
+        return True
+
+
+
+    def Order(self,key):
         list = []
 
         for i in range(len(key)):
@@ -42,7 +65,7 @@ class CipherMachine:
 
         return list
 
-    def TranspositionCipher(text, key):
+    def TranspositionCipher(self, text, key):
         order = self.Order(key)
         column = len(key)
         row = m.ceil(len(text) / len(key))
@@ -64,7 +87,7 @@ class CipherMachine:
 
         return cipherMessage
 
-    def TranspositionDecipher(text, key):
+    def TranspositionDecipher(self,text, key):
         order = self.Order(key)
         column = len(key)
         row = m.floor(len(text) / column)
@@ -94,7 +117,7 @@ class CipherMachine:
 
         return finalMessage
 
-    def ceasarCipher(text, key):
+    def ceasarCipher(self, text, key):
 
         newtext = ""
         index = 0
@@ -107,7 +130,7 @@ class CipherMachine:
 
         return newtext
 
-    def ceasarDecipher(text, key):
+    def ceasarDecipher(self, text, key):
         newtext = ""
         index = 0
 
@@ -118,23 +141,59 @@ class CipherMachine:
                 index = 0
 
         return newtext
-    
-    def Encrypt(self):
+
+    def isEOF(self,block,size):
         pass
+
+    def Encrypt(self):
+        name="encryption/"
+        for i in range(10):
+            name+=chr(random.randint(ord('a'),ord('z')))
+        name+=".crypt"
+
+        with open(name,"w") as outfile:
+            outfile.write(self.hashed)#make sure to delete once second stage is implemented
+            outfile.write(self.fileDir+'|')
+            index=0
+            block=self.infile.read(ord(self.hashed[index]))
+            while len(block)==ord(self.hashed[index]):
+                outfile.write(self.TranspositionCipher(block,self.password))
+                index+=1
+                if index==len(self.hashed):
+                    index-=len(self.hashed)
+                block = self.infile.read(ord(self.hashed[index]))
+
+
 
     def Decrypt(self):
-        pass
+        name=""
+        readNext=self.infile.read(1)
+        while readNext!="|":
+            name+=readNext
+            readNext=self.infile.read(1)
+
+        with open(name,'w') as outfile:
+            index=0
+            block = self.infile.read(ord(self.hashed[index]))
+            while len(block) == ord(self.hashed[index]):
+                outfile.write(self.TranspositionDecipher(block, self.password))
+                index += 1
+                if index == len(self.hashed):
+                    index -= len(self.hashed)
+                block = self.infile.read(ord(self.hashed[index]))
 
 
 
-    def crypt(self):
+
+    def start(self):
+
+        print(self.password, " ", self.fileDir)
         if self.mode==status.CIPHER:
              self.Encrypt()
-        if self.mode==status.DECIPHER:
+        elif self.mode==status.DECIPHER:
             self.Decrypt()
-
         else:
-            print("please include a file you would like to encrypt/decrypt")
+            print("error determining mode please include a file you would like to encrypt/decrypt")
 
 
 

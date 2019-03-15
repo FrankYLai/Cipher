@@ -1,5 +1,6 @@
 import math as m
 import random
+import hashlib
 
 def Order(key):
     list=[]
@@ -96,32 +97,47 @@ def ceasarDecipher(text, key):
 
     return newtext
 
-times=0
-check=True
-while (check):
+# times=0
+# check=True
+# while (check):
+#
+#     keySize=random.randint(5,16)
+#     key=""
+#     for x in range(keySize):
+#         key+= chr(random.randint(1,256))
+#     textSize=random.randint(64,512)
+#     text=""
+#     for x in range(textSize):
+#         text+= chr(random.randint(1,256))
+#
+#
+#     A=TranspositionCipher(text,key)
+#     B=TranspositionDecipher(A,key)
+#
+#     C=ceasarCipher(text,key)
+#     D=ceasarDecipher(C,key)
+#
+#     times+=1
+#     print (times)
+#
+#     if (text!=B):
+#         check=False
+#         print("text: ",text)
+#         print("key: ",key)
+#         print("times: ", times)
+#
+#     if (text!=D):
+#         check=False
+#         print("text: ",text)
+#         print("key: ",key)
+#         print("times: ", times)
 
-    keySize=random.randint(5,16)
-    key=""
-    for x in range(keySize):
-        key+= chr(random.randint(1,256))
-    textSize=random.randint(64,512)
-    text=""
-    for x in range(textSize):
-        text+= chr(random.randint(1,256))
+hashed=hashlib.sha256(input("put password in here: ").encode()).hexdigest()
+for i in range (5):
+    hashed=hashlib.sha256(hashed.encode()).hexdigest()
+    print(hashed[1])
+    print(len(hashed))
 
-
-    A=TranspositionCipher(text,key)
-    B=TranspositionDecipher(A,key)
-
-    C=ceasarCipher(text,key)
-    D=ceasarDecipher(C,key)
-
-    times+=1
-    print (times)
-
-    if (text!=B):
-        check=False
-        print("text: ",text)
-        print("key: ",key)
-        print("times: ", times)
+# infile=open("test.txt",'r')
+# print(infile.read(9000))
 
