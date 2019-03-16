@@ -3,6 +3,7 @@ import math as m
 import hashlib
 import random
 import chardet
+import os
 
 class status(Enum):
     IDLE = 1
@@ -17,35 +18,36 @@ class CipherMachine:
         self.hashed = ""
         self.fileDir = ""
         self.encoding = ""
-
-    def __del__(self):
-        self.infile.close()
+        self.fileName = ""
+        self.filePath = ""
 
     def changeMode(self, status):
         self.mode=status
 
-    def detector(self):
-        detector = chardet.UniversalDetector()
-        detector.reset()
-        with open(self.fileDir, mode='rb') as f:
-            for b in f:
-                detector.feed(b)
-                if detector.done: break
-        detector.close()
-        return detector.result['encoding']
 
     def Open(self,fileDir):
         self.fileDir = fileDir
-        self.encoding = self.detector()
+        list=fileDir.split("\\")
+        self.fileName = list[len(list)-1]
+        del list[-1]
+        self.filePath = '\\'.join(list)
+
         try:
-            self.infile=open(self.fileDir, "r",encoding=self.encoding)
+            detector = chardet.UniversalDetector()
+            detector.reset()
+            with open(self.fileDir, mode='rb') as f:
+                for b in f:
+                    detector.feed(b)
+                    if detector.done: break
+            detector.close()
+            self.encoding = detector.result['encoding']
+
             if fileDir.endswith(".crypt"):
-                self.mode=status.DECIPHER
-                print("run1")
+                self.mode = status.DECIPHER
             else:
-                self.mode=status.CIPHER
-                print('run2')
+                self.mode = status.CIPHER
             return True
+
         except FileNotFoundError:
             return False
 
@@ -54,10 +56,9 @@ class CipherMachine:
         self.hashed = hashlib.sha256(self.password.encode()).hexdigest()
 
         if self.mode == status.DECIPHER:
-            if self.infile.read(len(self.hashed)) != self.hashed:
-                self.infile.close()
-                self.infile.open(self.fileDir, 'r', encoding=self.encoding)
-                return False
+            with open(self.fileDir, 'r', encoding=self.encoding) as infile:
+                if infile.read(len(self.hashed)) != self.hashed:
+                    return False
 
         return True
 
@@ -155,50 +156,91 @@ class CipherMachine:
 
 
     def Encrypt(self):
-        name="encryption/"
+
+        #stage 1 encode
+        with open(self.fileDir,'r',encoding=self.encoding) as infile:
+            with open("temp.crypt","w",encoding=self.encoding) as outfile:
+
+                outfile.write(self.fileDir+'|')
+                index=0
+                block=infile.read(ord(self.hashed[index]))
+                while len(block)!=0:
+                    outfile.write(self.ceasarCipher(self.TranspositionCipher(block,self.password),self.password))  #completes transposition before ceasar
+
+                    index += 1
+                    if index == len(self.hashed):
+                        index -= len(self.hashed)
+                    block = infile.read(ord(self.hashed[index]))
+
+        os.remove(self.fileDir)
+        # stage 2 encode
+
+        name2 = self.filePath + "\\"
         for i in range(10):
-            name+=chr(random.randint(ord('a'),ord('z')))
-        name+=".crypt"
+            name2 += chr(random.randint(ord('a'), ord('z')))
+        name2 += ".crypt"
 
-        with open(name,"w",encoding=self.encoding) as outfile:
-            outfile.write(self.hashed)  #make sure to delete once second stage is implemented
-            outfile.write(self.fileDir+'|')
-            index=0
-            block=self.infile.read(ord(self.hashed[index]))
-            while len(block)==ord(self.hashed[index]):
-                outfile.write(self.ceasarCipher(self.TranspositionCipher(block,self.password),self.password))  #completes transposition before ceasar
+        with open("temp.crypt", 'r', encoding=self.encoding) as fin:
+            with open(name2, 'w', encoding=self.encoding) as fout:
+                fout.write(self.hashed)
+                index = 0
+                block = fin.read(ord(self.password[index]))
 
-                index += 1
-                if index == len(self.hashed):
-                    index -= len(self.hashed)
-                block = self.infile.read(ord(self.hashed[index]))
+                while len(block) != 0:
+                    fout.write(self.TranspositionCipher(block, self.password))
+                    index += 1
+                    if index == len(self.password):
+                        index -= len(self.password)
+
+                    block = fin.read(ord(self.password[index]))
+        os.remove("temp.crypt")
 
 
 
     def Decrypt(self):
-        name=""
-        readNext = self.infile.read(1)
-        while readNext != "|":
-            name += readNext
-            readNext = self.infile.read(1)
+       # second stage decrypt
+        with open(self.fileDir,'r',encoding=self.encoding) as fin:
+            fin.read(len(self.hashed))
+            with open('temp.crypt','w',encoding=self.encoding) as fout:
+                index = 0
+                block=fin.read(ord(self.password[index]))
 
-        with open(name, 'w', encoding=self.encoding) as outfile:
-            index=0
-            block = self.infile.read(ord(self.hashed[index]))
-            while len(block) == ord(self.hashed[index]):
-                outfile.write(self.TranspositionDecipher(self.ceasarDecipher(block, self.password),self.password))#completes ceasar before transposition
+                while len(block)!=0:
+                    fout.write(self.TranspositionDecipher(block, self.password))
+                    index += 1
+                    if index == len(self.password):
+                        index -= len(self.password)
 
-                index += 1
-                if index == len(self.hashed):
-                    index -= len(self.hashed)
-                block = self.infile.read(ord(self.hashed[index]))
+                    block = fin.read(ord(self.password[index]))
+
+        os.remove(self.fileDir)
+
+        #first stage decrypt
+        with open("temp.crypt",'r',encoding=self.encoding) as infile:
+            name=self.filePath+"\\"
+            readNext = infile.read(1)
+            while readNext != "|":
+                name += readNext
+                readNext = infile.read(1)
+
+            with open(name, 'w', encoding=self.encoding) as outfile:
+                index=0
+                block = infile.read(ord(self.hashed[index]))
+                while len(block) !=0:
+                    outfile.write(self.TranspositionDecipher(self.ceasarDecipher(block, self.password),self.password))#completes ceasar before transposition
+                    index += 1
+                    if index == len(self.hashed):
+                        index -= len(self.hashed)
+                    block = infile.read(ord(self.hashed[index]))
+
+        os.remove("temp.crypt")
 
 
 
 
     def start(self):
 
-        print(self.password, " ", self.fileDir)
+        print("your password is: ", self.password, " ", self.fileDir, " has been encrypted")
         if self.mode==status.CIPHER:
              self.Encrypt()
         elif self.mode==status.DECIPHER:
