@@ -1,0 +1,16 @@
+version 0.0
+
+concept code for a cipher program.
+The scrpt is capable of encoding and decoding ASCII, UTF based files(complex files that use more difficult encoders fail to be detected by the chardet library)
+
+how to use:
+0) run the python script main.py
+1) Enter the directory of the file you want to encode
+2) Enter a password
+3) done!
+
+The program will take un source file and encode it into a file in the same directory with the file type .crypt for recognition.
+The program automatically detects the type of file and decides to encrypt or decrypt it based on the file extension.
+effective for encrypting sensitive information sotored in txt files or in simple programming scripts such as .c .py etc.
+
+This project is still unfinished. changes comming will be imporved file compatibiity, better user interface(.exe file?), and possibly a face unlock.

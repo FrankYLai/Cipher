@@ -20,6 +20,7 @@ class CipherMachine:
         self.encoding = ""
         self.fileName = ""
         self.filePath = ""
+        self.fileEncoding = ""
 
     def changeMode(self, status):
         self.mode=status
@@ -46,9 +47,16 @@ class CipherMachine:
                 self.mode = status.DECIPHER
             else:
                 self.mode = status.CIPHER
+            try:
+                with open(self.fileDir,"r", encoding=self.encoding) as read_test:
+                    read_test.read(1000)
+            except UnicodeDecodeError:
+                print("this type of file cannot be encrypted due to decoding error. try a different type of file")
+                return False
             return True
 
         except FileNotFoundError:
+            print("file not found, please make sure spelling is correct")
             return False
 
     def save_password(self, key):
@@ -159,9 +167,9 @@ class CipherMachine:
 
         #stage 1 encode
         with open(self.fileDir,'r',encoding=self.encoding) as infile:
-            with open("temp.crypt","w",encoding=self.encoding) as outfile:
-
+            with open("temp.crypt","w",encoding="UTF-8") as outfile:
                 outfile.write(self.fileDir+'|')
+                outfile.write(self.encoding + "|")
                 index=0
                 block=infile.read(ord(self.hashed[index]))
                 while len(block)!=0:
@@ -173,15 +181,17 @@ class CipherMachine:
                     block = infile.read(ord(self.hashed[index]))
 
         os.remove(self.fileDir)
-        # stage 2 encode
 
-        name2 = self.filePath + "\\"
+        # stage 2 encode
+        name2 = ""
+        if self.filePath!="":
+            name2 += self.filePath + "\\"
         for i in range(10):
             name2 += chr(random.randint(ord('a'), ord('z')))
         name2 += ".crypt"
 
-        with open("temp.crypt", 'r', encoding=self.encoding) as fin:
-            with open(name2, 'w', encoding=self.encoding) as fout:
+        with open("temp.crypt", 'r', encoding="UTF-8") as fin:
+            with open(name2, 'w', encoding="UTF-8") as fout:
                 fout.write(self.hashed)
                 index = 0
                 block = fin.read(ord(self.password[index]))
@@ -199,9 +209,9 @@ class CipherMachine:
 
     def Decrypt(self):
        # second stage decrypt
-        with open(self.fileDir,'r',encoding=self.encoding) as fin:
+        with open(self.fileDir,'r',encoding="UTF-8") as fin:
             fin.read(len(self.hashed))
-            with open('temp.crypt','w',encoding=self.encoding) as fout:
+            with open('temp.crypt','w',encoding="UTF-8") as fout:
                 index = 0
                 block=fin.read(ord(self.password[index]))
 
@@ -216,14 +226,20 @@ class CipherMachine:
         os.remove(self.fileDir)
 
         #first stage decrypt
-        with open("temp.crypt",'r',encoding=self.encoding) as infile:
-            name=self.filePath+"\\"
+        name=""
+        if self.filePath != "":
+            name = self.filePath + "\\"
+        with open("temp.crypt",'r',encoding="UTF-8") as infile:
             readNext = infile.read(1)
             while readNext != "|":
                 name += readNext
                 readNext = infile.read(1)
+            readNext = infile.read(1)
+            while readNext != "|":
+                self.fileEncoding += readNext
+                readNext = infile.read(1)
 
-            with open(name, 'w', encoding=self.encoding) as outfile:
+            with open(name, 'w', encoding=self.fileEncoding) as outfile:
                 index=0
                 block = infile.read(ord(self.hashed[index]))
                 while len(block) !=0:

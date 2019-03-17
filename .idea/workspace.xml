@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1fbccd64-7f3e-4d68-aeb9-41ce7f9e1b26" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1984.txt" beforeDir="false" afterPath="$PROJECT_DIR$/1984.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/1984.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/CipherMachine.py" beforeDir="false" afterPath="$PROJECT_DIR$/CipherMachine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/encryption/cputsqdgrg.crypt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/encryption/oylolisisp.crypt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/encryption/yetipiyabk.crypt" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,8 +28,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CipherMachine.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="219" column="37" lean-forward="true" selection-start-line="219" selection-start-column="37" selection-end-line="219" selection-end-column="37" />
+            <state relative-caret-position="635">
+              <caret line="255" lean-forward="true" selection-start-line="255" selection-end-line="255" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
                 <element signature="e#1986#2289#0" />
@@ -83,7 +79,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="587" />
+    <option name="x" value="763" />
     <option name="y" value="-15" />
     <option name="width" value="943" />
     <option name="height" value="1087" />
@@ -277,6 +273,17 @@
       <window_info anchor="right" id="R Packages" order="4" />
     </layout>
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CipherMachine.py</url>
+          <line>175</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/../python practice/facial2/recognizer.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -313,8 +320,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CipherMachine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="219" column="37" lean-forward="true" selection-start-line="219" selection-start-column="37" selection-end-line="219" selection-end-column="37" />
+        <state relative-caret-position="635">
+          <caret line="255" lean-forward="true" selection-start-line="255" selection-end-line="255" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
             <element signature="e#1986#2289#0" />
